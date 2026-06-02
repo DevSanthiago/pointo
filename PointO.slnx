@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/backend/" />
+  <Folder Name="/backend/src/">
+    <Project Path="backend/src/PointO.API/PointO.API.csproj" />
+    <Project Path="backend/src/PointO.Application/PointO.Application.csproj" />
+    <Project Path="backend/src/PointO.Domain/PointO.Domain.csproj" />
+    <Project Path="backend/src/PointO.Infrastructure/PointO.Infrastructure.csproj" />
+  </Folder>
+</Solution>

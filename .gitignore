@@ -1,0 +1,28 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.log
+
+# Secrets
+appsettings.*.local.json
+**/appsettings.local.json
+*.env
+.env
+
+# EF Core migrations (optional — remova esta linha se quiser versionar as migrations)
+# backend/src/PointO.Infrastructure/Persistence/Migrations/
+
+# Node / Frontend
+node_modules/
+dist/
+.vite/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# OS
+.DS_Store
+Thumbs.db
