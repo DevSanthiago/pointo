@@ -36,7 +36,13 @@ public sealed class SupabaseStorageService(HttpClient httpClient, IConfiguration
         request.Content = content;
 
         var response = await httpClient.SendAsync(request, ct);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var corpo = await response.Content.ReadAsStringAsync(ct);
+            var trecho = corpo.Length > 200 ? corpo[..200] : corpo;
+            throw new InvalidOperationException(
+                $"DIAG upload storage {(int)response.StatusCode}: url='{_supabaseUrl}' bucket='{_bucket}' keyLen={_serviceKey.Length} corpo='{trecho}'");
+        }
 
         var publicUrl = $"{_supabaseUrl}/storage/v1/object/public/{_bucket}/{path}";
         return (publicUrl, path);
