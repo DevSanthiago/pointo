@@ -20,6 +20,33 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
+const LEMBRADOS_KEY = 'pointo.ultimoRegistro'
+type Lembrados = Pick<FormData, 'empresa' | 'cnpj' | 'local' | 'nomeFuncionario'>
+
+function lerLembrados(): Partial<Lembrados> {
+  try {
+    return JSON.parse(localStorage.getItem(LEMBRADOS_KEY) ?? '{}') as Partial<Lembrados>
+  } catch {
+    return {}
+  }
+}
+
+function salvarLembrados(dados: Lembrados) {
+  localStorage.setItem(LEMBRADOS_KEY, JSON.stringify(dados))
+}
+
+function valoresIniciais(): FormData {
+  return {
+    empresa: '',
+    cnpj: '',
+    local: '',
+    nomeFuncionario: '',
+    ...lerLembrados(),
+    dataPonto: '',
+    horarioPonto: '',
+  }
+}
+
 interface UploadSheetProps {
   aberto: boolean
   onFechar: () => void
@@ -34,6 +61,7 @@ export function UploadSheet({ aberto, onFechar }: UploadSheetProps) {
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
+    defaultValues: valoresIniciais(),
   })
 
   const handleArquivo = (file: File) => {
@@ -56,7 +84,7 @@ export function UploadSheet({ aberto, onFechar }: UploadSheetProps) {
     setArquivo(null)
     setPreview(null)
     setErrImagem('')
-    reset()
+    reset(valoresIniciais())
     onFechar()
   }
 
@@ -67,7 +95,17 @@ export function UploadSheet({ aberto, onFechar }: UploadSheetProps) {
     }
     criar.mutate(
       { ...data, imagem: arquivo },
-      { onSuccess: limpar },
+      {
+        onSuccess: () => {
+          salvarLembrados({
+            empresa: data.empresa,
+            cnpj: data.cnpj,
+            local: data.local,
+            nomeFuncionario: data.nomeFuncionario,
+          })
+          limpar()
+        },
+      },
     )
   }
 
