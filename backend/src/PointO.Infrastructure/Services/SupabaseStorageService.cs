@@ -42,8 +42,14 @@ public sealed class SupabaseStorageService(HttpClient httpClient, IConfiguration
 
         var response = await httpClient.SendAsync(request, ct);
 
-        // Ignora 404 — arquivo pode já ter sido removido manualmente
-        if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.NotFound)
-            response.EnsureSuccessStatusCode();
+        if (response.IsSuccessStatusCode)
+            return;
+
+        // Arquivo pode já ter sido removido: Supabase responde 404, ou 400 com corpo {"error":"not_found"}
+        var corpo = await response.Content.ReadAsStringAsync(ct);
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound || corpo.Contains("not_found"))
+            return;
+
+        response.EnsureSuccessStatusCode();
     }
 }
