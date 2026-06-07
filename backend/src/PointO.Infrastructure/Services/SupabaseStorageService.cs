@@ -5,11 +5,18 @@ namespace PointO.Infrastructure.Services;
 
 public sealed class SupabaseStorageService(HttpClient httpClient, IConfiguration configuration) : IStorageService
 {
-    private readonly string _supabaseUrl = (configuration["Supabase:Url"]
-        ?? throw new InvalidOperationException("Supabase:Url não configurado.")).Trim().TrimEnd('/');
+    private readonly string _supabaseUrl = NormalizarUrl(configuration["Supabase:Url"]
+        ?? throw new InvalidOperationException("Supabase:Url não configurado."));
     private readonly string _serviceKey = (configuration["Supabase:ServiceKey"]
         ?? throw new InvalidOperationException("Supabase:ServiceKey não configurado.")).Trim();
     private readonly string _bucket = (configuration["Supabase:Bucket"] ?? "comprovantes").Trim();
+
+    private static string NormalizarUrl(string valor)
+    {
+        var idx = valor.IndexOf("http", StringComparison.OrdinalIgnoreCase);
+        var url = (idx >= 0 ? valor[idx..] : $"https://{valor}").Trim();
+        return url.TrimEnd('/');
+    }
 
     public async Task<(string Url, string Path)> UploadImagemAsync(
         Stream stream, string nomeArquivo, string contentType, CancellationToken ct = default)
