@@ -2,21 +2,24 @@
 
 ## Backend → Railway
 
-1. Acesse [railway.app](https://railway.app) e crie um novo projeto
-2. Conecte o repositório GitHub e selecione a pasta `backend/src/PointO.API` como root
+O backend é multi-projeto (a API referencia Application/Infrastructure via `../`),
+então o deploy usa o **Dockerfile** em `backend/Dockerfile` (contexto `backend/`,
+enxerga os 4 projetos). NÃO usar root `backend/src/PointO.API` com Nixpacks — o build falha.
+
+1. Acesse [railway.app](https://railway.app) e crie um novo projeto a partir do repositório GitHub
+2. Em **Settings → Root Directory**, defina `backend` (Railway detecta o `Dockerfile` automaticamente)
 3. Configure as variáveis de ambiente no Railway:
 
 | Variável | Valor |
 |---|---|
-| `ConnectionStrings__DefaultConnection` | Connection string do Supabase |
+| `ConnectionStrings__DefaultConnection` | Connection string do Supabase (session pooler, porta 5432) |
 | `Supabase__Url` | URL do projeto Supabase |
 | `Supabase__ServiceKey` | service_role key do Supabase |
 | `Supabase__Bucket` | `comprovantes` |
-| `AllowedOrigins` | URL do frontend na Vercel (ex: `https://pointo.vercel.app`) |
-| `ASPNETCORE_ENVIRONMENT` | `Production` |
-| `ASPNETCORE_URLS` | `http://+:$PORT` |
+| `AllowedOrigins` | URL do frontend na Vercel (definir no passo de CORS) |
 
-4. Railway detecta automaticamente o .NET e faz o build via `dotnet publish`
+4. O Dockerfile já fixa `ASPNETCORE_ENVIRONMENT=Production` e faz o bind em `http://0.0.0.0:$PORT`
+   (Railway injeta `PORT`); não é preciso definir `ASPNETCORE_URLS` manualmente.
 5. As migrations são aplicadas automaticamente no startup da aplicação
 
 ## Frontend → Vercel
