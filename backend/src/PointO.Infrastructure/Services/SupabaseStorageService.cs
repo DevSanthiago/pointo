@@ -14,8 +14,10 @@ public sealed class SupabaseStorageService(HttpClient httpClient, IConfiguration
     private static string NormalizarUrl(string valor)
     {
         var idx = valor.IndexOf("http", StringComparison.OrdinalIgnoreCase);
-        var url = (idx >= 0 ? valor[idx..] : $"https://{valor}").Trim();
-        return url.TrimEnd('/');
+        var url = (idx >= 0 ? valor[idx..] : $"https://{valor}").Trim().TrimEnd('/');
+        if (!Uri.TryCreate(url, UriKind.Absolute, out _))
+            throw new InvalidOperationException($"DIAG Supabase:Url invalida apos normalizar: len={url.Length} valor='{url}'");
+        return url;
     }
 
     public async Task<(string Url, string Path)> UploadImagemAsync(
