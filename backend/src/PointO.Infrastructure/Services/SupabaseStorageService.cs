@@ -14,10 +14,7 @@ public sealed class SupabaseStorageService(HttpClient httpClient, IConfiguration
     private static string NormalizarUrl(string valor)
     {
         var idx = valor.IndexOf("http", StringComparison.OrdinalIgnoreCase);
-        var url = (idx >= 0 ? valor[idx..] : $"https://{valor}").Trim().TrimEnd('/');
-        if (!Uri.TryCreate(url, UriKind.Absolute, out _))
-            throw new InvalidOperationException($"DIAG Supabase:Url invalida apos normalizar: len={url.Length} valor='{url}'");
-        return url;
+        return (idx >= 0 ? valor[idx..] : $"https://{valor}").Trim().TrimEnd('/');
     }
 
     public async Task<(string Url, string Path)> UploadImagemAsync(
@@ -36,13 +33,7 @@ public sealed class SupabaseStorageService(HttpClient httpClient, IConfiguration
         request.Content = content;
 
         var response = await httpClient.SendAsync(request, ct);
-        if (!response.IsSuccessStatusCode)
-        {
-            var corpo = await response.Content.ReadAsStringAsync(ct);
-            var trecho = corpo.Length > 200 ? corpo[..200] : corpo;
-            throw new InvalidOperationException(
-                $"DIAG upload storage {(int)response.StatusCode}: url='{_supabaseUrl}' bucket='{_bucket}' keyLen={_serviceKey.Length} corpo='{trecho}'");
-        }
+        response.EnsureSuccessStatusCode();
 
         var publicUrl = $"{_supabaseUrl}/storage/v1/object/public/{_bucket}/{path}";
         return (publicUrl, path);
