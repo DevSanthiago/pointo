@@ -16,6 +16,10 @@ public static class DependencyInjection
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IRegistroRepository, RegistroRepository>();
+        services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+
+        services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
+        services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 
         services.AddHttpClient<IStorageService, SupabaseStorageService>();
 

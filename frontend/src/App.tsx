@@ -3,7 +3,9 @@ import { Header } from '@/components/layout/Header'
 import { RegistrosFiltros } from '@/components/registros/RegistrosFiltros'
 import { RegistrosTable } from '@/components/registros/RegistrosTable'
 import { UploadSheet } from '@/components/upload/UploadSheet'
+import { AuthPage } from '@/components/auth/AuthPage'
 import { useRegistros } from '@/hooks/registros/useRegistros'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Filtros {
   dataInicio: string
@@ -11,7 +13,7 @@ interface Filtros {
   empresa: string
 }
 
-export default function App() {
+function Painel() {
   const [uploadAberto, setUploadAberto] = useState(false)
   const [filtros, setFiltros] = useState<Filtros>({ dataInicio: '', dataFim: '', empresa: '' })
 
@@ -42,4 +44,12 @@ export default function App() {
       <UploadSheet aberto={uploadAberto} onFechar={() => setUploadAberto(false)} />
     </div>
   )
+}
+
+export default function App() {
+  const { isAutenticado } = useAuth()
+
+  if (!isAutenticado) return <AuthPage />
+
+  return <Painel />
 }

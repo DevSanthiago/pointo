@@ -1,11 +1,14 @@
-import { Upload } from 'lucide-react'
+import { LogOut, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface HeaderProps {
   onUploadClick: () => void
 }
 
 export function Header({ onUploadClick }: HeaderProps) {
+  const { usuario, logout } = useAuth()
+
   return (
     <header className="border-b border-border bg-card">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -19,10 +22,18 @@ export function Header({ onUploadClick }: HeaderProps) {
               <p className="text-xs text-muted-foreground mt-0.5">Registro de ponto</p>
             </div>
           </div>
-          <Button onClick={onUploadClick}>
-            <Upload />
-            Novo registro
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button onClick={onUploadClick}>
+              <Upload />
+              Novo registro
+            </Button>
+            <div className="flex items-center gap-2 border-l border-border pl-3">
+              <span className="hidden sm:inline text-sm text-muted-foreground">{usuario?.nome}</span>
+              <Button variant="ghost" size="icon" onClick={logout} title="Sair">
+                <LogOut />
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </header>

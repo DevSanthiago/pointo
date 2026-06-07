@@ -15,6 +15,10 @@ public sealed class RegistroPontoConfiguration : IEntityTypeConfiguration<Regist
         builder.Property(r => r.Id)
             .HasColumnName("id");
 
+        builder.Property(r => r.UsuarioId)
+            .IsRequired()
+            .HasColumnName("usuario_id");
+
         builder.Property(r => r.Empresa)
             .IsRequired()
             .HasMaxLength(200)
@@ -66,5 +70,11 @@ public sealed class RegistroPontoConfiguration : IEntityTypeConfiguration<Regist
 
         builder.HasIndex(r => r.DataPonto).HasDatabaseName("ix_registros_ponto_data");
         builder.HasIndex(r => r.Empresa).HasDatabaseName("ix_registros_ponto_empresa");
+        builder.HasIndex(r => r.UsuarioId).HasDatabaseName("ix_registros_ponto_usuario");
+
+        builder.HasOne<Usuario>()
+            .WithMany()
+            .HasForeignKey(r => r.UsuarioId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

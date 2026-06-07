@@ -8,9 +8,9 @@ namespace PointO.Infrastructure.Repositories;
 public sealed class RegistroRepository(AppDbContext context) : IRegistroRepository
 {
     public async Task<IEnumerable<RegistroPonto>> ObterTodosAsync(
-        DateOnly? dataInicio, DateOnly? dataFim, string? empresa, CancellationToken ct = default)
+        Guid usuarioId, DateOnly? dataInicio, DateOnly? dataFim, string? empresa, CancellationToken ct = default)
     {
-        var query = context.RegistrosPonto.AsQueryable();
+        var query = context.RegistrosPonto.Where(r => r.UsuarioId == usuarioId);
 
         if (dataInicio.HasValue)
             query = query.Where(r => r.DataPonto >= dataInicio.Value);
@@ -27,12 +27,13 @@ public sealed class RegistroRepository(AppDbContext context) : IRegistroReposito
             .ToListAsync(ct);
     }
 
-    public async Task<RegistroPonto?> ObterPorIdAsync(Guid id, CancellationToken ct = default) =>
-        await context.RegistrosPonto.FindAsync([id], ct);
-
-    public async Task<IEnumerable<RegistroPonto>> ObterPorDataAsync(DateOnly data, CancellationToken ct = default) =>
+    public async Task<RegistroPonto?> ObterPorIdAsync(Guid usuarioId, Guid id, CancellationToken ct = default) =>
         await context.RegistrosPonto
-            .Where(r => r.DataPonto == data)
+            .FirstOrDefaultAsync(r => r.Id == id && r.UsuarioId == usuarioId, ct);
+
+    public async Task<IEnumerable<RegistroPonto>> ObterPorDataAsync(Guid usuarioId, DateOnly data, CancellationToken ct = default) =>
+        await context.RegistrosPonto
+            .Where(r => r.UsuarioId == usuarioId && r.DataPonto == data)
             .OrderBy(r => r.HorarioPonto)
             .ToListAsync(ct);
 

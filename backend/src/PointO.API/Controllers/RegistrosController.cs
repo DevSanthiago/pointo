@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PointO.API.Models;
 using PointO.Application.Registros.Commands.CreateRegistro;
@@ -10,6 +11,7 @@ using PointO.Application.Registros.Queries.GetRegistrosByDate;
 namespace PointO.API.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/v1/[controller]")]
 public sealed class RegistrosController(IMediator mediator) : ControllerBase
 {

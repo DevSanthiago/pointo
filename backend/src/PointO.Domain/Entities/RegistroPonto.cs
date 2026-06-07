@@ -5,6 +5,7 @@ namespace PointO.Domain.Entities;
 public class RegistroPonto
 {
     public Guid Id { get; private set; }
+    public Guid UsuarioId { get; private set; }
     public string Empresa { get; private set; } = string.Empty;
     public string Cnpj { get; private set; } = string.Empty;
     public string Local { get; private set; } = string.Empty;
@@ -20,6 +21,7 @@ public class RegistroPonto
     private RegistroPonto() { }
 
     public static RegistroPonto Criar(
+        Guid usuarioId,
         string empresa,
         string cnpj,
         string local,
@@ -32,6 +34,7 @@ public class RegistroPonto
         return new RegistroPonto
         {
             Id = Guid.NewGuid(),
+            UsuarioId = usuarioId,
             Empresa = empresa,
             Cnpj = cnpj,
             Local = local,

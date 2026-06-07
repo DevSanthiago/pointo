@@ -7,7 +7,8 @@ namespace PointO.Application.Registros.Commands.CreateRegistro;
 
 public sealed class CreateRegistroCommandHandler(
     IRegistroRepository repository,
-    IStorageService storage)
+    IStorageService storage,
+    ICurrentUser currentUser)
     : IRequestHandler<CreateRegistroCommand, RegistroDto>
 {
     public async Task<RegistroDto> Handle(CreateRegistroCommand request, CancellationToken ct)
@@ -19,6 +20,7 @@ public sealed class CreateRegistroCommandHandler(
             ct);
 
         var registro = RegistroPonto.Criar(
+            currentUser.Id,
             request.Empresa,
             request.Cnpj,
             request.Local,
