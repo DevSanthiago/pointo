@@ -53,9 +53,7 @@ export function AuthPage() {
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold">
-            P
-          </div>
+          <img src="/icons/icon-192.png" alt="PointO" className="mx-auto mb-2 h-10 w-10 rounded-md" />
           <CardTitle className="text-lg">
             {modo === 'login' ? 'Entrar no PointO' : 'Criar conta'}
           </CardTitle>

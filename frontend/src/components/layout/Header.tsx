@@ -14,9 +14,7 @@ export function Header({ onUploadClick }: HeaderProps) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-sm">
-              P
-            </div>
+            <img src="/icons/icon-192.png" alt="PointO" className="h-8 w-8 rounded-md" />
             <div>
               <h1 className="text-base font-semibold leading-none">PointO</h1>
               <p className="text-xs text-muted-foreground mt-0.5">Registro de ponto</p>
