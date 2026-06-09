@@ -1,11 +1,12 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { api } from '@/services/api'
-import type { Registro } from '@/types/registro'
+import type { PaginaRegistros, Registro } from '@/types/registro'
 
 interface Filtros {
   dataInicio?: string
   dataFim?: string
   empresa?: string
+  pagina?: number
 }
 
 export function useRegistros(filtros: Filtros = {}) {
@@ -16,9 +17,11 @@ export function useRegistros(filtros: Filtros = {}) {
       if (filtros.dataInicio) params.set('dataInicio', filtros.dataInicio)
       if (filtros.dataFim) params.set('dataFim', filtros.dataFim)
       if (filtros.empresa) params.set('empresa', filtros.empresa)
-      const { data } = await api.get<Registro[]>(`/api/v1/registros?${params}`)
+      params.set('pagina', String(filtros.pagina ?? 1))
+      const { data } = await api.get<PaginaRegistros>(`/api/v1/registros?${params}`)
       return data
     },
+    placeholderData: keepPreviousData,
   })
 }
 

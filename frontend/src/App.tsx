@@ -13,15 +13,38 @@ interface Filtros {
   empresa: string
 }
 
+function saudacao(): string {
+  const hora = new Date().getHours()
+  if (hora < 12) return 'Bom dia'
+  if (hora < 18) return 'Boa tarde'
+  return 'Boa noite'
+}
+
 function Painel() {
+  const { usuario } = useAuth()
   const [uploadAberto, setUploadAberto] = useState(false)
   const [filtros, setFiltros] = useState<Filtros>({ dataInicio: '', dataFim: '', empresa: '' })
+  const [pagina, setPagina] = useState(1)
 
-  const { data: registros = [], isLoading } = useRegistros({
+  const { data, isLoading } = useRegistros({
     dataInicio: filtros.dataInicio || undefined,
     dataFim: filtros.dataFim || undefined,
     empresa: filtros.empresa || undefined,
+    pagina,
   })
+
+  const registros = data?.itens ?? []
+  const total = data?.total ?? 0
+  const totalPaginas = data?.totalPaginas ?? 0
+
+  if (totalPaginas > 0 && pagina > totalPaginas) {
+    setPagina(totalPaginas)
+  }
+
+  const aoFiltrar = (novos: Filtros) => {
+    setFiltros(novos)
+    setPagina(1)
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -30,15 +53,25 @@ function Painel() {
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold">Registros de ponto</h2>
             <p className="text-sm text-muted-foreground">
-              {registros.length} {registros.length === 1 ? 'registro' : 'registros'} encontrados
+              {saudacao()},{' '}
+              <span className="font-medium text-foreground">{usuario?.nome}</span>
+            </p>
+            <h2 className="text-lg font-semibold mt-0.5">Registros de ponto</h2>
+            <p className="text-sm text-muted-foreground">
+              {total} {total === 1 ? 'registro' : 'registros'} encontrados
             </p>
           </div>
         </div>
 
-        <RegistrosFiltros onFiltrar={setFiltros} />
-        <RegistrosTable registros={registros} isLoading={isLoading} />
+        <RegistrosFiltros onFiltrar={aoFiltrar} />
+        <RegistrosTable
+          registros={registros}
+          isLoading={isLoading}
+          pagina={pagina}
+          totalPaginas={totalPaginas}
+          onPaginaChange={setPagina}
+        />
       </main>
 
       <UploadSheet aberto={uploadAberto} onFechar={() => setUploadAberto(false)} />

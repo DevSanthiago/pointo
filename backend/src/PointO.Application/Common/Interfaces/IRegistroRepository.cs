@@ -4,7 +4,7 @@ namespace PointO.Application.Common.Interfaces;
 
 public interface IRegistroRepository
 {
-    Task<IEnumerable<RegistroPonto>> ObterTodosAsync(Guid usuarioId, DateOnly? dataInicio, DateOnly? dataFim, string? empresa, CancellationToken ct = default);
+    Task<(IReadOnlyList<RegistroPonto> Itens, int Total)> ObterTodosAsync(Guid usuarioId, DateOnly? dataInicio, DateOnly? dataFim, string? empresa, int pagina, int tamanhoPagina, CancellationToken ct = default);
     Task<RegistroPonto?> ObterPorIdAsync(Guid usuarioId, Guid id, CancellationToken ct = default);
     Task<IEnumerable<RegistroPonto>> ObterPorDataAsync(Guid usuarioId, DateOnly data, CancellationToken ct = default);
     Task<RegistroPonto> CriarAsync(RegistroPonto registro, CancellationToken ct = default);

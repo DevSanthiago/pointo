@@ -7,8 +7,8 @@ namespace PointO.Infrastructure.Repositories;
 
 public sealed class RegistroRepository(AppDbContext context) : IRegistroRepository
 {
-    public async Task<IEnumerable<RegistroPonto>> ObterTodosAsync(
-        Guid usuarioId, DateOnly? dataInicio, DateOnly? dataFim, string? empresa, CancellationToken ct = default)
+    public async Task<(IReadOnlyList<RegistroPonto> Itens, int Total)> ObterTodosAsync(
+        Guid usuarioId, DateOnly? dataInicio, DateOnly? dataFim, string? empresa, int pagina, int tamanhoPagina, CancellationToken ct = default)
     {
         var query = context.RegistrosPonto.Where(r => r.UsuarioId == usuarioId);
 
@@ -21,10 +21,16 @@ public sealed class RegistroRepository(AppDbContext context) : IRegistroReposito
         if (!string.IsNullOrWhiteSpace(empresa))
             query = query.Where(r => r.Empresa.ToLower().Contains(empresa.ToLower()));
 
-        return await query
+        var total = await query.CountAsync(ct);
+
+        var itens = await query
             .OrderByDescending(r => r.DataPonto)
             .ThenByDescending(r => r.HorarioPonto)
+            .Skip((pagina - 1) * tamanhoPagina)
+            .Take(tamanhoPagina)
             .ToListAsync(ct);
+
+        return (itens, total);
     }
 
     public async Task<RegistroPonto?> ObterPorIdAsync(Guid usuarioId, Guid id, CancellationToken ct = default) =>

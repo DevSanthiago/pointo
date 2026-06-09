@@ -12,6 +12,14 @@ export interface Registro {
   atualizadoEm: string | null
 }
 
+export interface PaginaRegistros {
+  itens: Registro[]
+  total: number
+  pagina: number
+  tamanhoPagina: number
+  totalPaginas: number
+}
+
 export interface CriarRegistroPayload {
   empresa: string
   cnpj: string

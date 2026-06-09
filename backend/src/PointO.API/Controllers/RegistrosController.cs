@@ -20,9 +20,11 @@ public sealed class RegistrosController(IMediator mediator) : ControllerBase
         [FromQuery] DateOnly? dataInicio,
         [FromQuery] DateOnly? dataFim,
         [FromQuery] string? empresa,
-        CancellationToken ct)
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanhoPagina = 10,
+        CancellationToken ct = default)
     {
-        var result = await mediator.Send(new GetAllRegistrosQuery(dataInicio, dataFim, empresa), ct);
+        var result = await mediator.Send(new GetAllRegistrosQuery(dataInicio, dataFim, empresa, pagina, tamanhoPagina), ct);
         return Ok(result);
     }
 

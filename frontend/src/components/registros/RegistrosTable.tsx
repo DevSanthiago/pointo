@@ -2,12 +2,10 @@ import { useState } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
-  getSortedRowModel,
   flexRender,
   type ColumnDef,
-  type SortingState,
 } from '@tanstack/react-table'
-import { ArrowUpDown, ExternalLink, Pencil, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ExternalLink, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -34,27 +32,31 @@ function formatarHorario(horario: string) {
 interface RegistrosTableProps {
   registros: Registro[]
   isLoading: boolean
+  pagina: number
+  totalPaginas: number
+  onPaginaChange: (pagina: number) => void
 }
 
-export function RegistrosTable({ registros, isLoading }: RegistrosTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
+export function RegistrosTable({
+  registros,
+  isLoading,
+  pagina,
+  totalPaginas,
+  onPaginaChange,
+}: RegistrosTableProps) {
   const [editando, setEditando] = useState<Registro | null>(null)
   const deletar = useDeletarRegistro()
+
+  const excluir = (registro: Registro) => {
+    if (confirm('Deseja excluir este registro?')) {
+      deletar.mutate(registro.id)
+    }
+  }
 
   const columns: ColumnDef<Registro>[] = [
     {
       accessorKey: 'dataPonto',
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="-ml-2"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Data
-          <ArrowUpDown className="ml-1 size-3.5" />
-        </Button>
-      ),
+      header: 'Data',
       cell: ({ row }) => (
         <span className="font-medium tabular-nums">{formatarData(row.original.dataPonto)}</span>
       ),
@@ -125,11 +127,7 @@ export function RegistrosTable({ registros, isLoading }: RegistrosTableProps) {
             variant="ghost"
             size="icon-sm"
             className="text-destructive hover:text-destructive"
-            onClick={() => {
-              if (confirm('Deseja excluir este registro?')) {
-                deletar.mutate(row.original.id)
-              }
-            }}
+            onClick={() => excluir(row.original)}
             aria-label="Excluir"
           >
             <Trash2 />
@@ -142,10 +140,7 @@ export function RegistrosTable({ registros, isLoading }: RegistrosTableProps) {
   const table = useReactTable({
     data: registros,
     columns,
-    state: { sorting },
-    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
   })
 
   if (isLoading) {
@@ -169,7 +164,70 @@ export function RegistrosTable({ registros, isLoading }: RegistrosTableProps) {
 
   return (
     <>
-      <div className="rounded-lg border border-border overflow-hidden">
+      <div className="grid gap-3 sm:hidden">
+        {registros.map((registro) => (
+          <div key={registro.id} className="rounded-lg border border-border bg-card p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-medium tabular-nums">
+                  {formatarData(registro.dataPonto)} · {formatarHorario(registro.horarioPonto)}
+                </p>
+                <p className="text-sm text-muted-foreground mt-0.5">{registro.empresa}</p>
+              </div>
+              <Badge variant={registro.status === 'Ativo' ? 'default' : 'secondary'}>
+                {registro.status}
+              </Badge>
+            </div>
+
+            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
+              <div className="flex flex-col">
+                <dt className="text-xs text-muted-foreground">CNPJ</dt>
+                <dd className="tabular-nums">{registro.cnpj}</dd>
+              </div>
+              <div className="flex flex-col">
+                <dt className="text-xs text-muted-foreground">Funcionário</dt>
+                <dd>{registro.nomeFuncionario}</dd>
+              </div>
+              <div className="col-span-2 flex flex-col">
+                <dt className="text-xs text-muted-foreground">Local</dt>
+                <dd>{registro.local || '—'}</dd>
+              </div>
+            </dl>
+
+            <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+              <a
+                href={registro.imagemUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-primary hover:underline text-sm"
+              >
+                Ver comprovante <ExternalLink className="size-3" />
+              </a>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setEditando(registro)}
+                  aria-label="Editar"
+                >
+                  <Pencil />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => excluir(registro)}
+                  aria-label="Excluir"
+                >
+                  <Trash2 />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="hidden sm:block rounded-lg border border-border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (
@@ -197,6 +255,34 @@ export function RegistrosTable({ registros, isLoading }: RegistrosTableProps) {
           </TableBody>
         </Table>
       </div>
+
+      {totalPaginas > 1 && (
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm text-muted-foreground">
+            Página {pagina} de {totalPaginas}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={pagina <= 1}
+              onClick={() => onPaginaChange(pagina - 1)}
+            >
+              <ChevronLeft />
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={pagina >= totalPaginas}
+              onClick={() => onPaginaChange(pagina + 1)}
+            >
+              Próxima
+              <ChevronRight />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {editando && (
         <EditarRegistroDialog

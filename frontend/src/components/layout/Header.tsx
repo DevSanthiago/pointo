@@ -7,7 +7,7 @@ interface HeaderProps {
 }
 
 export function Header({ onUploadClick }: HeaderProps) {
-  const { usuario, logout } = useAuth()
+  const { logout } = useAuth()
 
   return (
     <header className="border-b border-border bg-card">
@@ -25,8 +25,7 @@ export function Header({ onUploadClick }: HeaderProps) {
               <Upload />
               Novo registro
             </Button>
-            <div className="flex items-center gap-2 border-l border-border pl-3">
-              <span className="hidden sm:inline text-sm text-muted-foreground">{usuario?.nome}</span>
+            <div className="flex items-center border-l border-border pl-3">
               <Button variant="ghost" size="icon" onClick={logout} title="Sair">
                 <LogOut />
               </Button>
