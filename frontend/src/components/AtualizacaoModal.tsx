@@ -23,8 +23,8 @@ export function AtualizacaoModal() {
   const progresso = ((SEGUNDOS - restante) / SEGUNDOS) * 100
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-xl bg-popover p-5 text-popover-foreground shadow-lg ring-1 ring-foreground/10">
+    <div className="anim-fade-in fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+      <div className="anim-pop-in w-full max-w-sm rounded-xl bg-popover p-5 text-popover-foreground shadow-lg ring-1 ring-foreground/10">
         <div className="flex items-center gap-2">
           <RefreshCw className="size-4 text-primary" />
           <h2 className="text-base font-semibold">Nova versão disponível</h2>

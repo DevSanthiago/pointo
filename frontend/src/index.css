@@ -76,6 +76,41 @@
   box-sizing: border-box;
 }
 
+@keyframes pointo-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pointo-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anim-fade-in {
+  animation: pointo-fade-in 0.2s ease-out;
+}
+
+.anim-pop-in {
+  animation: pointo-pop-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-in,
+  .anim-pop-in {
+    animation: none;
+  }
+}
+
 body {
   margin: 0;
   background-color: var(--background);

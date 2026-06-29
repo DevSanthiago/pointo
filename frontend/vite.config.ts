@@ -1,11 +1,13 @@
 import path from 'path'
+import { readFileSync } from 'fs'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Versão do app = commit curto da Vercel (VERCEL_GIT_COMMIT_SHA); 'dev' em local.
-const versao = (process.env.VERCEL_GIT_COMMIT_SHA ?? 'dev').slice(0, 7)
+// Versão semver (ex.: 1.0.1) — fonte única em package.json. Bump a cada deploy.
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'))
+const versao: string = pkg.version
 
 // Emite /version.json no build para o app comparar e oferecer atualização.
 function emitVersionJson(): Plugin {

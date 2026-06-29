@@ -1,73 +1,57 @@
-# React + TypeScript + Vite
+# PointO — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SPA em React 19 + Vite + TypeScript. UI com shadcn/ui (nova style, `@base-ui/react`) e
+Tailwind CSS v4. Server state via TanStack Query; formulários com React Hook Form + Zod.
+Empacotado como **PWA** (instalável em iOS/Android) via `vite-plugin-pwa`.
 
-Currently, two official plugins are available:
+## Scripts
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev      # desenvolvimento (http://localhost:5173)
+npm run build    # type-check (tsc -b) + build de produção (vite build)
+npm run preview  # serve o build localmente
+npm run lint     # eslint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Variáveis de ambiente
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+`.env.local`:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+VITE_API_URL    # URL base do backend, SEM /api/v1 e sem barra final
+                # (ex.: http://localhost:5017 em dev; URL do Railway em prod)
+```
+
+## Estrutura
+
+```
+src/
+├── components/
+│   ├── ui/                     # shadcn/ui (button, card, table, dialog, sheet, ...)
+│   ├── layout/Header.tsx       # cabeçalho + versão do app
+│   ├── auth/AuthPage.tsx       # login/cadastro
+│   ├── registros/              # tabela, filtros, editar, ver comprovante (modal)
+│   ├── upload/UploadSheet.tsx  # drawer inferior de novo registro
+│   └── AtualizacaoModal.tsx    # modal de nova versão com contagem regressiva
+├── hooks/
+│   ├── registros/              # useRegistros, useUltimoRegistro, mutations
+│   └── useAtualizacaoDisponivel.ts  # polling de /version.json
+├── contexts/AuthContext.tsx    # token + usuário (localStorage)
+├── services/api.ts             # axios (Bearer + logout no 401)
+└── types/                      # Registro, Auth
+```
+
+## PWA e versionamento
+
+- O `vite-plugin-pwa` gera `manifest.webmanifest` + service worker (`registerType: 'autoUpdate'`).
+- A versão é o campo `version` do `package.json` (semver). O Vite injeta em `__APP_VERSION__`
+  e emite `dist/version.json` no build.
+- `useAtualizacaoDisponivel` busca `/version.json` (sem cache) a cada 60s e ao focar a aba.
+  Diferença na versão → `AtualizacaoModal` recarrega o app após 5s.
+- **A cada deploy com mudanças, faça bump do `version` no `package.json`.**
+
+## Padrões
+
+- Acesso à API só via hooks (TanStack Query); componentes nunca usam axios direto.
+- Lógica em hooks; JSX só renderiza.
+- Cores sempre via tokens do design system (`bg-primary`, `text-muted-foreground`), nunca hex.

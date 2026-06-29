@@ -1,3 +1,4 @@
+import { ExternalLink } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 interface ComprovanteDialogProps {
@@ -21,9 +22,9 @@ export function ComprovanteDialog({ url, legenda, onClose }: ComprovanteDialogPr
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="self-start text-sm text-primary hover:underline"
+          className="inline-flex items-center gap-1 self-start text-sm text-primary hover:underline"
         >
-          Abrir em nova aba
+          Abrir em nova aba <ExternalLink className="size-3" />
         </a>
       </DialogContent>
     </Dialog>
