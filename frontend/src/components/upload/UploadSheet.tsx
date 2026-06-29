@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCriarRegistro } from '@/hooks/registros/useCriarRegistro'
+import { useUltimoRegistro } from '@/hooks/registros/useUltimoRegistro'
+import type { Registro } from '@/types/registro'
 
 const schema = z.object({
   empresa: z.string().min(1, 'Obrigatório'),
@@ -35,13 +37,33 @@ function salvarLembrados(dados: Lembrados) {
   localStorage.setItem(LEMBRADOS_KEY, JSON.stringify(dados))
 }
 
-function valoresIniciais(): FormData {
+function temAlgo(d: Partial<Lembrados>): boolean {
+  return Boolean(d.empresa || d.cnpj || d.local || d.nomeFuncionario)
+}
+
+// localStorage tem prioridade (último uso manual). Se foi limpo, cai no último
+// registro do servidor — assim os dados se auto-preenchem mesmo após limpar o cache.
+function camposPersistidos(sugestao: Registro | null | undefined): Partial<Lembrados> {
+  const lembrados = lerLembrados()
+  if (temAlgo(lembrados)) return lembrados
+  if (sugestao) {
+    return {
+      empresa: sugestao.empresa,
+      cnpj: sugestao.cnpj,
+      local: sugestao.local,
+      nomeFuncionario: sugestao.nomeFuncionario,
+    }
+  }
+  return {}
+}
+
+function valoresIniciais(sugestao?: Registro | null): FormData {
   return {
     empresa: '',
     cnpj: '',
     local: '',
     nomeFuncionario: '',
-    ...lerLembrados(),
+    ...camposPersistidos(sugestao),
     dataPonto: '',
     horarioPonto: '',
   }
@@ -58,11 +80,18 @@ export function UploadSheet({ aberto, onFechar }: UploadSheetProps) {
   const [errImagem, setErrImagem] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const criar = useCriarRegistro()
+  const { data: ultimo } = useUltimoRegistro()
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, reset, formState: { errors, isDirty } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: valoresIniciais(),
+    defaultValues: valoresIniciais(ultimo),
   })
+
+  // Re-preenche ao abrir e quando o último registro do servidor chega — sem
+  // sobrescrever o que o usuário já digitou (isDirty).
+  useEffect(() => {
+    if (aberto && !isDirty) reset(valoresIniciais(ultimo))
+  }, [aberto, ultimo, isDirty, reset])
 
   const handleArquivo = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -84,7 +113,7 @@ export function UploadSheet({ aberto, onFechar }: UploadSheetProps) {
     setArquivo(null)
     setPreview(null)
     setErrImagem('')
-    reset(valoresIniciais())
+    reset(valoresIniciais(ultimo))
     onFechar()
   }
 
@@ -111,12 +140,17 @@ export function UploadSheet({ aberto, onFechar }: UploadSheetProps) {
 
   return (
     <Sheet open={aberto} onOpenChange={(open) => !open && limpar()}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
-        <SheetHeader>
+      <SheetContent
+        side="bottom"
+        className="max-h-[92dvh] overflow-y-auto rounded-t-2xl"
+      >
+        <div className="mx-auto w-full max-w-2xl">
+        <SheetHeader className="px-0">
+          <div className="mx-auto mb-2 h-1.5 w-10 rounded-full bg-muted" />
           <SheetTitle>Novo registro de ponto</SheetTitle>
         </SheetHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-6 flex flex-col gap-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-4 flex flex-col gap-5">
           <div className="flex flex-col lg:flex-row gap-5">
             {/* Image upload */}
             <div className="flex flex-col gap-1.5 lg:w-64 shrink-0">
@@ -185,7 +219,7 @@ export function UploadSheet({ aberto, onFechar }: UploadSheetProps) {
                 <Input {...register('local')} placeholder="Local de trabalho" />
               </div>
               <div className="sm:col-span-2 flex flex-col gap-1.5">
-                <Label>Funcionário</Label>
+                <Label>Colaborador</Label>
                 <Input {...register('nomeFuncionario')} placeholder="Seu nome completo" />
                 {errors.nomeFuncionario && <span className="text-xs text-destructive">{errors.nomeFuncionario.message}</span>}
               </div>
@@ -211,6 +245,7 @@ export function UploadSheet({ aberto, onFechar }: UploadSheetProps) {
             </Button>
           </div>
         </form>
+        </div>
       </SheetContent>
     </Sheet>
   )

@@ -6,6 +6,8 @@ import { UploadSheet } from '@/components/upload/UploadSheet'
 import { AuthPage } from '@/components/auth/AuthPage'
 import { useRegistros } from '@/hooks/registros/useRegistros'
 import { useAuth } from '@/contexts/AuthContext'
+import { useAtualizacaoDisponivel } from '@/hooks/useAtualizacaoDisponivel'
+import { AtualizacaoModal } from '@/components/AtualizacaoModal'
 
 interface Filtros {
   dataInicio: string
@@ -81,8 +83,12 @@ function Painel() {
 
 export default function App() {
   const { isAutenticado } = useAuth()
+  const atualizacaoDisponivel = useAtualizacaoDisponivel()
 
-  if (!isAutenticado) return <AuthPage />
-
-  return <Painel />
+  return (
+    <>
+      {atualizacaoDisponivel && <AtualizacaoModal />}
+      {isAutenticado ? <Painel /> : <AuthPage />}
+    </>
+  )
 }

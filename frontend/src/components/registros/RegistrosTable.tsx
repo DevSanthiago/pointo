@@ -5,7 +5,7 @@ import {
   flexRender,
   type ColumnDef,
 } from '@tanstack/react-table'
-import { ChevronLeft, ChevronRight, ExternalLink, Pencil, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Eye, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge'
 import type { Registro } from '@/types/registro'
 import { useDeletarRegistro } from '@/hooks/registros/useDeletarRegistro'
 import { EditarRegistroDialog } from '@/components/registros/EditarRegistroDialog'
+import { ComprovanteDialog } from '@/components/registros/ComprovanteDialog'
 
 function formatarData(data: string) {
   const [ano, mes, dia] = data.split('-')
@@ -45,6 +46,7 @@ export function RegistrosTable({
   onPaginaChange,
 }: RegistrosTableProps) {
   const [editando, setEditando] = useState<Registro | null>(null)
+  const [verComprovante, setVerComprovante] = useState<Registro | null>(null)
   const deletar = useDeletarRegistro()
 
   const excluir = (registro: Registro) => {
@@ -85,7 +87,7 @@ export function RegistrosTable({
     },
     {
       accessorKey: 'nomeFuncionario',
-      header: 'Funcionário',
+      header: 'Colaborador',
     },
     {
       accessorKey: 'status',
@@ -100,14 +102,13 @@ export function RegistrosTable({
       id: 'imagem',
       header: 'Comprovante',
       cell: ({ row }) => (
-        <a
-          href={row.original.imagemUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          type="button"
+          onClick={() => setVerComprovante(row.original)}
           className="inline-flex items-center gap-1 text-primary hover:underline text-sm"
         >
-          Ver <ExternalLink className="size-3" />
-        </a>
+          Ver <Eye className="size-3" />
+        </button>
       ),
     },
     {
@@ -185,7 +186,7 @@ export function RegistrosTable({
                 <dd className="tabular-nums">{registro.cnpj}</dd>
               </div>
               <div className="flex flex-col">
-                <dt className="text-xs text-muted-foreground">Funcionário</dt>
+                <dt className="text-xs text-muted-foreground">Colaborador</dt>
                 <dd>{registro.nomeFuncionario}</dd>
               </div>
               <div className="col-span-2 flex flex-col">
@@ -195,14 +196,13 @@ export function RegistrosTable({
             </dl>
 
             <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-              <a
-                href={registro.imagemUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                onClick={() => setVerComprovante(registro)}
                 className="inline-flex items-center gap-1 text-primary hover:underline text-sm"
               >
-                Ver comprovante <ExternalLink className="size-3" />
-              </a>
+                Ver comprovante <Eye className="size-3" />
+              </button>
               <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
@@ -288,6 +288,14 @@ export function RegistrosTable({
         <EditarRegistroDialog
           registro={editando}
           onClose={() => setEditando(null)}
+        />
+      )}
+
+      {verComprovante && (
+        <ComprovanteDialog
+          url={verComprovante.imagemUrl}
+          legenda={`${verComprovante.empresa} · ${formatarData(verComprovante.dataPonto)} ${formatarHorario(verComprovante.horarioPonto)}`}
+          onClose={() => setVerComprovante(null)}
         />
       )}
     </>

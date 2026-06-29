@@ -69,7 +69,7 @@ export function EditarRegistroDialog({ registro, onClose }: EditarRegistroDialog
               <Input {...register('local')} />
             </div>
             <div className="col-span-2 flex flex-col gap-1.5">
-              <Label>Funcionário</Label>
+              <Label>Colaborador</Label>
               <Input {...register('nomeFuncionario')} />
               {errors.nomeFuncionario && <span className="text-xs text-destructive">{errors.nomeFuncionario.message}</span>}
             </div>
