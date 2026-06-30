@@ -143,6 +143,7 @@ export function UploadSheet({ aberto, onFechar }: UploadSheetProps) {
       <SheetContent
         side="bottom"
         className="max-h-[92dvh] overflow-y-auto rounded-t-2xl"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div className="mx-auto w-full max-w-2xl">
         <SheetHeader className="px-0">

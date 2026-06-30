@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Header } from '@/components/layout/Header'
+import { Footer } from '@/components/layout/Footer'
 import { RegistrosFiltros } from '@/components/registros/RegistrosFiltros'
 import { RegistrosTable } from '@/components/registros/RegistrosTable'
 import { UploadSheet } from '@/components/upload/UploadSheet'
@@ -49,10 +50,10 @@ function Painel() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <Header onUploadClick={() => setUploadAberto(true)} />
 
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8 py-6 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <p className="text-sm text-muted-foreground">
@@ -75,6 +76,8 @@ function Painel() {
           onPaginaChange={setPagina}
         />
       </main>
+
+      <Footer />
 
       <UploadSheet aberto={uploadAberto} onFechar={() => setUploadAberto(false)} />
     </div>
